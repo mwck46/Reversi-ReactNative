@@ -42,77 +42,81 @@ export default function App() {
     });
   }
 
-  const updateMap = (oldMap: string[][], rowIdx: number, colIdx: number, currentTurn: string) => {
+  const updateMap = (gameboard: string[][], rowIdx: number, colIdx: number, currentTurn: string) => {
     // Add current
-    oldMap[rowIdx][colIdx] = currentTurn;
+    gameboard[rowIdx][colIdx] = currentTurn;
 
-    const numRow = oldMap.length
-    const numCol = oldMap[0].length
+    let updatedcount = 0
+
+    const numRow = gameboard.length
+    const numCol = gameboard[0].length
 
     // flip horizonal
     let holLow = colIdx
     for(let j=colIdx-1; j>=0; j--){
-      if(oldMap[rowIdx][j] === "") {
+      if(gameboard[rowIdx][j] === "") {
         holLow = colIdx
         break
       }
-      if(oldMap[rowIdx][j] === currentTurn) {
+      if(gameboard[rowIdx][j] === currentTurn) {
         holLow = j
         break
       }
     }
     let holHigh = colIdx
     for(let j=colIdx+1; j<numCol; j++){
-      if(oldMap[rowIdx][j] === "") {
+      if(gameboard[rowIdx][j] === "") {
         holHigh = colIdx
         break
       }
-      if(oldMap[rowIdx][j] === currentTurn) {
+      if(gameboard[rowIdx][j] === currentTurn) {
         holHigh = j
         break
       }
     }
     for(let j=holLow; j<holHigh; j++){
-      oldMap[rowIdx][j] = currentTurn
+      gameboard[rowIdx][j] = currentTurn
+      updatedcount++
     }
 
     // flip vertical
     let verLow = rowIdx 
     for(let i=rowIdx-1; i>=0; i--){
-      if(oldMap[i][colIdx] === "") {
+      if(gameboard[i][colIdx] === "") {
         verLow = rowIdx
         break
       }
-      if(oldMap[i][colIdx] === currentTurn) {
+      if(gameboard[i][colIdx] === currentTurn) {
         verLow = i
         break
       }
     }
     let verHigh = rowIdx 
     for(let i=rowIdx+1; i<numRow; i++){
-      if(oldMap[i][colIdx] === "") {
+      if(gameboard[i][colIdx] === "") {
         verHigh = rowIdx
         break
       }
-      if(oldMap[i][colIdx] === currentTurn) {
+      if(gameboard[i][colIdx] === currentTurn) {
         verHigh = i
         break
       }
     }
     for(let i=verLow; i<verHigh; i++){
-      oldMap[i][colIdx] = currentTurn
+      gameboard[i][colIdx] = currentTurn
+      updatedcount++
     }
 
     // flip -ve, -ve diagonal
     verLow = rowIdx 
     holLow = colIdx 
     for(let i=rowIdx-1, j=colIdx-1; i>=0 && j>=0; i--, j--){
-      if(oldMap[i][j] === "") {
+      if(gameboard[i][j] === "") {
         verLow = rowIdx 
         holLow = colIdx 
         break
       }
-      if(oldMap[i][j] === currentTurn) {
+      if(gameboard[i][j] === currentTurn) {
         verLow = i
         holLow = j
         break
@@ -122,58 +126,61 @@ export default function App() {
     verHigh = rowIdx 
     holHigh = colIdx 
     for(let i=rowIdx+1, j=colIdx+1; i<numRow && j<numCol; i++, j++){
-      if(oldMap[i][j] === "") {
+      if(gameboard[i][j] === "") {
         verHigh = rowIdx 
         holHigh = colIdx 
         break
       }
-      if(oldMap[i][j] === currentTurn) {
+      if(gameboard[i][j] === currentTurn) {
         verHigh = i
         holHigh = j
         break
       }
     }
     for(let i=verLow, j=holLow; i<verHigh && j<holHigh; i++, j++){
-      oldMap[i][j] = currentTurn
+      gameboard[i][j] = currentTurn
+      updatedcount++
     }
     
     // flip +ve, -ve diagonal
     verHigh = rowIdx 
     holLow = colIdx 
     for(let i=rowIdx+1, j=colIdx-1; i<numRow && j>=0; i++, j--){
-      if(oldMap[i][j] === "") {
+      if(gameboard[i][j] === "") {
         verHigh = rowIdx 
         holLow = colIdx 
         break
       }
-      if(oldMap[i][j] === currentTurn) {
+      if(gameboard[i][j] === currentTurn) {
         verHigh = i
         holLow = j
         break
       }
     }
     for(let i=rowIdx+1, j=colIdx-1; i<=verHigh && j>=holLow; i++, j--){
-      oldMap[i][j] = currentTurn
+      gameboard[i][j] = currentTurn
+      updatedcount++
     }
     // flip -ve, +ve diagonal
     verLow = rowIdx 
     holHigh = colIdx 
     for(let i=rowIdx-1, j=colIdx+1; i>=0 && j<numCol; i--, j++){
-      if(oldMap[i][j] === "") {
+      if(gameboard[i][j] === "") {
         verLow = rowIdx 
         holHigh = colIdx 
         break
       }
-      if(oldMap[i][j] === currentTurn) {
+      if(gameboard[i][j] === currentTurn) {
         verLow = i
         holHigh = j
         break
       }
     }
     for(let i=rowIdx-1, j=colIdx+1; i>=verLow && j<holHigh; i--, j++){
-      oldMap[i][j] = currentTurn
+      gameboard[i][j] = currentTurn
+      updatedcount++
     }
-    return oldMap
+    return updatedcount 
   }
 
   const onPress = (rowIndex: number, columnIndex: number) => {
@@ -181,17 +188,13 @@ export default function App() {
       Alert.alert("Position already occupied");
       return;
     }
-
-    setMap((existingMap) => {
-      //const updatedMap = [...existingMap];
-      //updatedMap[rowIndex][columnIndex] = currentTurn;
-      const updatedMap: string[][] = updateMap(existingMap, rowIndex, columnIndex, currentTurn)
-      
-      // updatedMap and existingMap is actually the same
-      //console.log(updatedMap === existingMap)
-      return updatedMap;
-    });
-
+    
+    const newMap = [...map]
+    const updatedCount = updateMap(newMap, rowIndex, columnIndex, currentTurn)
+    console.log(newMap === map)
+    console.log(updatedCount)
+    
+    setMap(newMap);
     setCurrentTurn(currentTurn === "w" ? "b" : "w");
   };
 
