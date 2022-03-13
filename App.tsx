@@ -48,35 +48,131 @@ export default function App() {
 
     const numRow = oldMap.length
     const numCol = oldMap[0].length
+
     // flip horizonal
+    let holLow = colIdx
     for(let j=colIdx-1; j>=0; j--){
-      if(oldMap[rowIdx][j] === "") break
-      if(oldMap[rowIdx][j] !== currentTurn) {
-        oldMap[rowIdx][j] = currentTurn
+      if(oldMap[rowIdx][j] === "") {
+        holLow = colIdx
+        break
+      }
+      if(oldMap[rowIdx][j] === currentTurn) {
+        holLow = j
+        break
       }
     }
+    let holHigh = colIdx
     for(let j=colIdx+1; j<numCol; j++){
-      if(oldMap[rowIdx][j] === "") break
-      if(oldMap[rowIdx][j] !== currentTurn) {
-        oldMap[rowIdx][j] = currentTurn
+      if(oldMap[rowIdx][j] === "") {
+        holHigh = colIdx
+        break
       }
+      if(oldMap[rowIdx][j] === currentTurn) {
+        holHigh = j
+        break
+      }
+    }
+    for(let j=holLow; j<holHigh; j++){
+      oldMap[rowIdx][j] = currentTurn
     }
 
     // flip vertical
+    let verLow = rowIdx 
     for(let i=rowIdx-1; i>=0; i--){
-      if(oldMap[i][colIdx] === "") break
-      if(oldMap[i][colIdx] !== currentTurn) {
-        oldMap[i][colIdx] = currentTurn
+      if(oldMap[i][colIdx] === "") {
+        verLow = rowIdx
+        break
+      }
+      if(oldMap[i][colIdx] === currentTurn) {
+        verLow = i
+        break
       }
     }
+    let verHigh = rowIdx 
     for(let i=rowIdx+1; i<numRow; i++){
-      if(oldMap[i][colIdx] === "") break
-      if(oldMap[i][colIdx] !== currentTurn) {
-        oldMap[i][colIdx] = currentTurn
+      if(oldMap[i][colIdx] === "") {
+        verHigh = rowIdx
+        break
       }
+      if(oldMap[i][colIdx] === currentTurn) {
+        verHigh = i
+        break
+      }
+    }
+    for(let i=verLow; i<verHigh; i++){
+      oldMap[i][colIdx] = currentTurn
     }
 
-    // flip diagonal
+    // flip -ve, -ve diagonal
+    verLow = rowIdx 
+    holLow = colIdx 
+    for(let i=rowIdx-1, j=colIdx-1; i>=0 && j>=0; i--, j--){
+      if(oldMap[i][j] === "") {
+        verLow = rowIdx 
+        holLow = colIdx 
+        break
+      }
+      if(oldMap[i][j] === currentTurn) {
+        verLow = i
+        holLow = j
+        break
+      }
+    }
+    // flip +ve, +ve diagonal
+    verHigh = rowIdx 
+    holHigh = colIdx 
+    for(let i=rowIdx+1, j=colIdx+1; i<numRow && j<numCol; i++, j++){
+      if(oldMap[i][j] === "") {
+        verHigh = rowIdx 
+        holHigh = colIdx 
+        break
+      }
+      if(oldMap[i][j] === currentTurn) {
+        verHigh = i
+        holHigh = j
+        break
+      }
+    }
+    for(let i=verLow, j=holLow; i<verHigh && j<holHigh; i++, j++){
+      oldMap[i][j] = currentTurn
+    }
+    
+    // flip +ve, -ve diagonal
+    verHigh = rowIdx 
+    holLow = colIdx 
+    for(let i=rowIdx+1, j=colIdx-1; i<numRow && j>=0; i++, j--){
+      if(oldMap[i][j] === "") {
+        verHigh = rowIdx 
+        holLow = colIdx 
+        break
+      }
+      if(oldMap[i][j] === currentTurn) {
+        verHigh = i
+        holLow = j
+        break
+      }
+    }
+    for(let i=rowIdx+1, j=colIdx-1; i<=verHigh && j>=holLow; i++, j--){
+      oldMap[i][j] = currentTurn
+    }
+    // flip -ve, +ve diagonal
+    verLow = rowIdx 
+    holHigh = colIdx 
+    for(let i=rowIdx-1, j=colIdx+1; i>=0 && j<numCol; i--, j++){
+      if(oldMap[i][j] === "") {
+        verLow = rowIdx 
+        holHigh = colIdx 
+        break
+      }
+      if(oldMap[i][j] === currentTurn) {
+        verLow = i
+        holHigh = j
+        break
+      }
+    }
+    for(let i=rowIdx-1, j=colIdx+1; i>=verLow && j<holHigh; i--, j++){
+      oldMap[i][j] = currentTurn
+    }
     return oldMap
   }
 
@@ -105,6 +201,7 @@ export default function App() {
       <View style={styles.header}>
         <Text> Black: you</Text>
         <Text> White: opponent</Text>
+        <Text> Current Turn: {currentTurn === "w"? "White":"Black"}</Text>
       </View>
 
       <View style={styles.gameboard}>
