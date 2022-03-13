@@ -6,8 +6,8 @@ const Cell = (props: any) => {
 
   return (
     <Pressable onPress={() => onPress()} style={styles.cell}>
-      {cell === "o" && <View style={[styles.circle, styles.blackcircle]} />}
-      {cell === "x" && <View style={[styles.circle, styles.whitecircle]} />}
+      {cell === "b" && <View style={[styles.circle, styles.blackcircle]} />}
+      {cell === "w" && <View style={[styles.circle, styles.whitecircle]} />}
     </Pressable>
   );
 };

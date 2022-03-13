@@ -4,7 +4,8 @@ import {
   StyleSheet,
   Text,
   View,
-  Alert
+  Alert,
+  Button,
 } from 'react-native';
 import Cell from "./components/Cell";
 
@@ -12,8 +13,8 @@ const emptyMap = [
   ["", "", "", "", "", "", "", ""],
   ["", "", "", "", "", "", "", ""],
   ["", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", ""],
+  ["", "", "", "b", "w", "", "", ""],
+  ["", "", "", "w", "b", "", "", ""],
   ["", "", "", "", "", "", "", ""],
   ["", "", "", "", "", "", "", ""],
   ["", "", "", "", "", "", "", ""],
@@ -21,7 +22,63 @@ const emptyMap = [
 
 export default function App() {
   const [map, setMap] = useState(emptyMap);
-  const [currentTurn, setCurrentTurn] = useState("x");
+  const [currentTurn, setCurrentTurn] = useState("w");
+  const [gameMode, setGameMode] = useState("LOCAL"); // LOCAL, REMOTE, BOT??
+
+  useEffect(() => {
+    // TODO: determin winer
+  }, [map]); // re-run the effect only if currentTurn change
+
+  const onResetGame = () => {
+    setMap((existingMap) => {
+      //console.log(existingMap)
+      const newMap = existingMap.map(row => row.map(cell => ""))
+      newMap[3][3] = "b"
+      newMap[3][4] = "w"
+      newMap[4][4] = "b"
+      newMap[4][3] = "w"
+      //console.log(newMap)
+      return newMap;
+    });
+  }
+
+  const updateMap = (oldMap: string[][], rowIdx: number, colIdx: number, currentTurn: string) => {
+    // Add current
+    oldMap[rowIdx][colIdx] = currentTurn;
+
+    const numRow = oldMap.length
+    const numCol = oldMap[0].length
+    // flip horizonal
+    for(let j=colIdx-1; j>=0; j--){
+      if(oldMap[rowIdx][j] === "") break
+      if(oldMap[rowIdx][j] !== currentTurn) {
+        oldMap[rowIdx][j] = currentTurn
+      }
+    }
+    for(let j=colIdx+1; j<numCol; j++){
+      if(oldMap[rowIdx][j] === "") break
+      if(oldMap[rowIdx][j] !== currentTurn) {
+        oldMap[rowIdx][j] = currentTurn
+      }
+    }
+
+    // flip vertical
+    for(let i=rowIdx-1; i>=0; i--){
+      if(oldMap[i][colIdx] === "") break
+      if(oldMap[i][colIdx] !== currentTurn) {
+        oldMap[i][colIdx] = currentTurn
+      }
+    }
+    for(let i=rowIdx+1; i<numRow; i++){
+      if(oldMap[i][colIdx] === "") break
+      if(oldMap[i][colIdx] !== currentTurn) {
+        oldMap[i][colIdx] = currentTurn
+      }
+    }
+
+    // flip diagonal
+    return oldMap
+  }
 
   const onPress = (rowIndex: number, columnIndex: number) => {
     if (map[rowIndex][columnIndex] !== "") {
@@ -30,12 +87,16 @@ export default function App() {
     }
 
     setMap((existingMap) => {
-      const updatedMap = [...existingMap];
-      updatedMap[rowIndex][columnIndex] = currentTurn;
+      //const updatedMap = [...existingMap];
+      //updatedMap[rowIndex][columnIndex] = currentTurn;
+      const updatedMap: string[][] = updateMap(existingMap, rowIndex, columnIndex, currentTurn)
+      
+      // updatedMap and existingMap is actually the same
+      //console.log(updatedMap === existingMap)
       return updatedMap;
     });
 
-    setCurrentTurn(currentTurn === "x" ? "o" : "x");
+    setCurrentTurn(currentTurn === "w" ? "b" : "w");
   };
 
 
@@ -61,7 +122,10 @@ export default function App() {
 
         ))}
       </View>
-      <Text style={styles.footer}> {"Your Turn"}</Text>
+      <View style={styles.footer}>
+        <Button title='Reset' onPress={() => onResetGame()}>
+        </Button>
+      </View>
 
       <StatusBar style="auto" />
     </View>
