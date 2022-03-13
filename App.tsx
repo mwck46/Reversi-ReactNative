@@ -63,6 +63,10 @@ export default function App() {
         break
       }
     }
+    for(let j=holLow+1; j<colIdx; j++){
+      gameboard[rowIdx][j] = currentTurn
+      updatedcount++
+    }
     let holHigh = colIdx
     for(let j=colIdx+1; j<numCol; j++){
       if(gameboard[rowIdx][j] === "") {
@@ -74,7 +78,7 @@ export default function App() {
         break
       }
     }
-    for(let j=holLow; j<holHigh; j++){
+    for(let j=colIdx+1; j<holHigh; j++){
       gameboard[rowIdx][j] = currentTurn
       updatedcount++
     }
@@ -91,6 +95,10 @@ export default function App() {
         break
       }
     }
+    for(let i=verLow+1; i<rowIdx; i++){
+      gameboard[i][colIdx] = currentTurn
+      updatedcount++
+    }
     let verHigh = rowIdx 
     for(let i=rowIdx+1; i<numRow; i++){
       if(gameboard[i][colIdx] === "") {
@@ -102,7 +110,7 @@ export default function App() {
         break
       }
     }
-    for(let i=verLow; i<verHigh; i++){
+    for(let i=rowIdx+1; i<verHigh; i++){
       gameboard[i][colIdx] = currentTurn
       updatedcount++
     }
@@ -122,6 +130,10 @@ export default function App() {
         break
       }
     }
+    for(let i=verLow+1, j=holLow+1; i<rowIdx && j<colIdx; i++, j++){
+      gameboard[i][j] = currentTurn
+      updatedcount++
+    }
     // flip +ve, +ve diagonal
     verHigh = rowIdx 
     holHigh = colIdx 
@@ -137,7 +149,7 @@ export default function App() {
         break
       }
     }
-    for(let i=verLow, j=holLow; i<verHigh && j<holHigh; i++, j++){
+    for(let i=rowIdx+1, j=colIdx+1; i<verHigh && j<holHigh; i++, j++){
       gameboard[i][j] = currentTurn
       updatedcount++
     }
@@ -157,7 +169,7 @@ export default function App() {
         break
       }
     }
-    for(let i=rowIdx+1, j=colIdx-1; i<=verHigh && j>=holLow; i++, j--){
+    for(let i=rowIdx+1, j=colIdx-1; i<verHigh && j>holLow; i++, j--){
       gameboard[i][j] = currentTurn
       updatedcount++
     }
@@ -176,7 +188,7 @@ export default function App() {
         break
       }
     }
-    for(let i=rowIdx-1, j=colIdx+1; i>=verLow && j<holHigh; i--, j++){
+    for(let i=rowIdx-1, j=colIdx+1; i>verLow && j<holHigh; i--, j++){
       gameboard[i][j] = currentTurn
       updatedcount++
     }
@@ -189,11 +201,18 @@ export default function App() {
       return;
     }
     
-    const newMap = [...map]
+    ///////////////////////////////////////////////////////////////////
+    //                          CAUTION! 
+    // newMap = [...map] cannot make a deep copy for an array of array
+    ///////////////////////////////////////////////////////////////////
+    const newMap = map.map((row)=>{return [...row]}) 
     const updatedCount = updateMap(newMap, rowIndex, columnIndex, currentTurn)
-    console.log(newMap === map)
-    console.log(updatedCount)
+    if(updatedCount === 0){
+      Alert.alert("Invalid Move");
+      return;
+    }
     
+    console.log("update")
     setMap(newMap);
     setCurrentTurn(currentTurn === "w" ? "b" : "w");
   };
