@@ -3,7 +3,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, Text, View, ScrollView, Alert, Button, } from 'react-native';
 import Cell from "./components/Cell";
 import uuid from 'react-native-uuid';
+import Constants from "expo-constants";
 
+const { manifest } = Constants;
 const characterId = uuid.v4().toString();
 const emptyMap = [
   ["", "", "", "", "", "", "", ""],
@@ -34,7 +36,16 @@ class GameMessage {
 };
 
 //const url = 'wss://gcym2i3l2d.execute-api.us-east-2.amazonaws.com/Prod';
-const url = 'ws://localhost:18080';
+var url = ""
+if (!manifest?.debuggerHost) {
+  url = 'ws://localhost:18080';
+} else {
+  url = `ws://${manifest.debuggerHost.split(':').shift()}:18080`;
+}
+//if(Device.isDevice){
+//  console.log("isdevice")
+//  url = 'ws://192.168,:18080'; //https://stackoverflow.com/a/6310592/9265852
+//}
 // Don't put websocket instance inside App, bcz everythin inside will 
 // be constantly refreshed, thus many connection will be created
 var wsock: WebSocket;
@@ -50,7 +61,7 @@ export default function App() {
 
   useEffect(() => {
     if (!character) return
-    
+
     const serverMessagesList: string[] = [];
 
     //serverMessagesList.push("set character " + character)
@@ -59,9 +70,9 @@ export default function App() {
       serverMessagesList.push("You are " + "HOST")
     } else if (character === 'P') {
       serverMessagesList.push("You are " + "PLAAYER2")
-      
+
       setColor(currentTurn)
-      
+
       ws.send(new GameMessage(characterId, "COLR=" + currentTurn).toJson())
     } else if (character === 'V') {
       serverMessagesList.push("You are " + "VIEWER")
@@ -69,12 +80,12 @@ export default function App() {
       console.log("unknown character")
     }
 
-      setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
+    setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
   }, [character]); // when character changed
 
   useEffect(() => {
     if (!yourColor) return
-    
+
     const serverMessagesList: string[] = [];
 
     //serverMessagesList.push("set color " + yourColor)
@@ -87,34 +98,34 @@ export default function App() {
       console.log("unknown color")
     }
 
-      setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
+    setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
   }, [yourColor]);
 
   useEffect(() => {
-    Alert.alert("ws changed")
+    //Alert.alert("ws changed")
     if (!ws) return
 
 
     ws.onopen = () => {
-    const serverMessagesList: string[] = [];
+      const serverMessagesList: string[] = [];
       serverMessagesList.push('Connected')
       ws.send(new GameMessage(characterId, "HOST?").toJson())
       setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
     };
     ws.onclose = (e) => {
-    const serverMessagesList: string[] = [];
+      const serverMessagesList: string[] = [];
       serverMessagesList.push('Disconnected')
       setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
     };
     ws.onerror = (e) => {
-    const serverMessagesList: string[] = [];
+      const serverMessagesList: string[] = [];
       const msg = e.message
       setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
     };
     ws.onmessage = (e) => {
-      
+
       const serverMessagesList: string[] = [];
-      serverMessagesList.push(e.data)
+      //serverMessagesList.push(e.data)
 
       const arr = e.data.split(':')
       const source = arr[0]
@@ -124,7 +135,7 @@ export default function App() {
         return
       }
 
-      serverMessagesList.push("character = " + character + "isNull = " + (character === ""))
+      //serverMessagesList.push("character = " + character + "isNull = " + (character === ""))
 
       if (character === "" && msg.startsWith("CHAR=")) {
         setCharacter(msg.substring(msg.length - 1))
