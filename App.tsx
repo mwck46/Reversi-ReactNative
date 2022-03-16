@@ -37,33 +37,19 @@ const url = 'wss://gcym2i3l2d.execute-api.us-east-2.amazonaws.com/Prod';
 // Don't put websocket instance inside App, bcz everythin inside will 
 // be constantly refreshed, thus many connection will be created
 var ws: WebSocket;
+var character: string = "";
+var yourColor: string = "";
 
 export default function App() {
   const [map, setMap] = useState(emptyMap);
   const [currentTurn, setCurrentTurn] = useState("w");
-  const [yourColor, setYourColor] = useState("");
   const [isConnect, setIsConnect] = useState(false);
   const [gameMode, setGameMode] = useState("LOCAL"); // LOCAL, REMOTE, BOT??
-  const [character, setCharacter] = useState(""); // HOST, PLAYER2, VIEWER
   const [serverMessages, setServerMessages] = useState<string[]>([]);
 
   useEffect(() => {
     // TODO: determin winer
   }, [map]); // re-run the effect only if currentTurn change
-  
-  useEffect(() => {
-    const serverMessagesList: string[] = serverMessages.map(x => x);
-    serverMessagesList.push("You are " + character)
-    setServerMessages([...serverMessagesList])
-    console.log("set character")
-  }, [character]); 
-  
-  useEffect(() => {
-    const serverMessagesList: string[] = serverMessages.map(x => x);
-    serverMessagesList.push("Your color is " + yourColor)
-    setServerMessages([...serverMessagesList])
-    console.log("set yourColor")
-  }, [yourColor]); 
 
   useEffect(() => {
     if (!isConnect) return
@@ -87,41 +73,39 @@ export default function App() {
       const arr = e.data.split(':')
       const source = arr[0]
       const msg = arr[1]
-      if(source === characterId){
+      if (source === characterId) {
         return
       }
       console.log(e.data);
+      console.log("character = " + character);
 
-      if(character === "" && msg.startsWith("HOST=")){
-        const c = msg.substring(msg.length - 1)
-        console.log(c)
-        setCharacter(c)
+      if (character === "" && msg.startsWith("HOST=")) {
+        character = msg.substring(msg.length - 1)
 
-        if(c === 'H'){
-         //serverMessagesList.push("You are " + character)
-        }else if(c === 'P'){
-          //serverMessagesList.push("You are " + character)
-          ws.send(new GameMessage(characterId, "CURR="+currentTurn).toJson())
-          setYourColor(currentTurn)
-          //serverMessagesList.push("Your color is " + yourColor)
-        }else if(c === 'V'){
-          //serverMessagesList.push("You are " + character)
-        }else{
+        if (character === 'H') {
+          serverMessagesList.push("You are " + "HOST")
+        } else if (character === 'P') {
+          serverMessagesList.push("You are " + "PLAAYER2")
+          ws.send(new GameMessage(characterId, "CURR=" + currentTurn).toJson())
+          yourColor = currentTurn
+        } else if (character === 'V') {
+          serverMessagesList.push("You are " + "VIEWER")
+        } else {
           console.log("unknown")
         }
-      } else if(msg.startsWith("CURR=")){
-        if(character !== 'H'){
+      } else if (msg.startsWith("CURR=")) {
+        if (character !== 'H') {
           serverMessagesList.push("Player2 joined")
         }
-        setCurrentTurn(msg.substring(msg.length - 1))
-        setYourColor(currentTurn === "b"? "w" : "b")
-        //serverMessagesList.push("Your color is " + yourColor)
-      } else if(msg.startsWith("NEXT=")){
-        const coords = msg.substring(5)
-        const rowIdx = parseInt(coords[0], 10) 
-        const colIdx = parseInt(coords[1], 10)
+        const t = msg.substring(msg.length - 1)
+        setCurrentTurn(t)
+        yourColor = (t === "b") ? "w" : "b"
+      } else if (msg.startsWith("NEXT=")) {
+        //const coords = msg.substring(5)
+        //const rowIdx = parseInt(coords[0], 10)
+        //const colIdx = parseInt(coords[1], 10)
 
-        onPress(rowIdx, colIdx)
+        //onPress(rowIdx, colIdx)
       }
 
       setServerMessages([...serverMessagesList])
@@ -330,8 +314,8 @@ export default function App() {
 
     console.log("your color = " + yourColor)
     console.log("curr turn = " + currentTurn)
-    if(yourColor === currentTurn)  {
-      ws.send(new GameMessage(characterId, "CURR=" + rowIndex + ","+ columnIndex).toJson())
+    if (yourColor === currentTurn) {
+      ws.send(new GameMessage(characterId, "NEXT=" + rowIndex + "," + columnIndex).toJson())
     }
     setMap(newMap);
     setCurrentTurn(currentTurn === "w" ? "b" : "w");
