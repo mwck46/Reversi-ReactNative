@@ -371,23 +371,21 @@ export default function App() {
   return (
     <View style={styles.container}>
 
-      <View style={{ flex: 1, flexDirection: 'row' }}>
-        <Button title='Connect' onPress={() => onConnectGameServer()}> </Button>
-        <Button title='Disconnect' onPress={() => onDisconnectGameServer()}></Button>
-      </View>
-
       <View style={styles.header}>
-        <Text> Current Turn: {currentTurn === "w" ? "White" : "Black"}</Text>
-        <Text> character: {character}</Text>
-        <Text> color: {yourColor}</Text>
+        <View style={styles.statusRow}>
+            <Text style={styles.status}> Current Turn: {currentTurn === "w" ? "White" : "Black"}</Text>
+            <Text style={styles.status}> Character: {character}</Text>
+            <Text style={styles.status}> Color: {yourColor}</Text>
+        </View>
 
-
-        <View style={{ backgroundColor: '#ffeece', padding: 5, flexGrow: 1 }}>
-          <ScrollView>
+        <View style={styles.logger}>
+          <ScrollView >
             {
               serverMessages.map((item, ind) => {
                 return (
-                  <Text key={ind}>{item}</Text>
+                  <Text key={ind} style={styles.logLine}>
+                    {item}
+                  </Text>
                 )
               })
             }
@@ -411,8 +409,17 @@ export default function App() {
         ))}
       </View>
       <View style={styles.footer}>
-        <Button title='Reset' onPress={() => onResetGame()}>
-        </Button>
+        <View style={styles.controlPanel}>
+        <View style={styles.button}>
+          <Button title='Connect' onPress={() => onConnectGameServer()}> </Button>
+        </View>
+        <View style={styles.button}>
+          <Button title='Disconnect' onPress={() => onDisconnectGameServer()}></Button>
+        </View>
+        <View style={styles.button}>
+          <Button title='Reset' onPress={() => onResetGame()}></Button>
+        </View>
+        </View>
       </View>
 
       <StatusBar style="auto" />
@@ -423,26 +430,44 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20,
     flexDirection: 'column',
+    paddingVertical: 20,
     backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   header: {
     flex: 3,
-    borderColor: "red",
-    borderWidth: 10
+    flexDirection: 'column',
+    marginVertical: 5
+    //borderColor: "red",
+    //borderWidth: 10,
+  },
+  statusRow: {
+    marginHorizontal: 10,
+    flexDirection: 'row',
+    //justifyContent: 'space-around',
+  },
+  status: {
+    fontSize: 20,
+    borderWidth: 1,
+    marginRight: 3,
+  },
+  logger: {
+    backgroundColor: '#ffeece',
+    flexGrow: 1,
+    borderWidth: 3,
+    marginHorizontal: 10,
   },
   gameboard: {
     aspectRatio: 1,
     width: "100%",
     borderColor: "black",
-    borderWidth: 10
+    borderWidth: 5,
+    marginTop: 25,
   },
   footer: {
     flex: 1,
     fontSize: 20,
+    marginTop: 5,
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
   },
@@ -450,4 +475,11 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
   },
+  controlPanel: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  button:{
+    flex: 1,
+  }
 });
