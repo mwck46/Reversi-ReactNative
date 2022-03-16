@@ -76,8 +76,7 @@ export default function App() {
       if (source === characterId) {
         return
       }
-      console.log(e.data);
-      console.log("character = " + character);
+      //console.log(e.data);
 
       if (character === "" && msg.startsWith("HOST=")) {
         character = msg.substring(msg.length - 1)
@@ -88,6 +87,7 @@ export default function App() {
           serverMessagesList.push("You are " + "PLAAYER2")
           ws.send(new GameMessage(characterId, "CURR=" + currentTurn).toJson())
           yourColor = currentTurn
+          serverMessagesList.push("Your color =  " + yourColor)
         } else if (character === 'V') {
           serverMessagesList.push("You are " + "VIEWER")
         } else {
@@ -100,12 +100,14 @@ export default function App() {
         const t = msg.substring(msg.length - 1)
         setCurrentTurn(t)
         yourColor = (t === "b") ? "w" : "b"
+        serverMessagesList.push("Your color =  " + yourColor)
       } else if (msg.startsWith("NEXT=")) {
-        //const coords = msg.substring(5)
-        //const rowIdx = parseInt(coords[0], 10)
-        //const colIdx = parseInt(coords[1], 10)
-
-        //onPress(rowIdx, colIdx)
+        const coords = msg.substring(5).split(',')
+        const rowIdx = parseInt(coords[0], 10)
+        const colIdx = parseInt(coords[1], 10)
+        
+        console.log(yourColor, rowIdx, colIdx)
+        onPress(rowIdx, colIdx)
       }
 
       setServerMessages([...serverMessagesList])
@@ -306,14 +308,15 @@ export default function App() {
     // newMap = [...map] cannot make a deep copy for an array of array
     ///////////////////////////////////////////////////////////////////
     const newMap = map.map((row) => { return [...row] }) // deep clone
+    console.log(character + ": currentTurn = "+ currentTurn)
     const updatedCount = updateMap(newMap, rowIndex, columnIndex, currentTurn)
     if (updatedCount === 0) {
+      console.log("update count = "+ updatedCount)
+      console.log(rowIndex +","+ columnIndex)
       Alert.alert("Invalid Move");
       return;
     }
 
-    console.log("your color = " + yourColor)
-    console.log("curr turn = " + currentTurn)
     if (yourColor === currentTurn) {
       ws.send(new GameMessage(characterId, "NEXT=" + rowIndex + "," + columnIndex).toJson())
     }
