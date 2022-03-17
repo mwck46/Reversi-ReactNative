@@ -360,9 +360,15 @@ export default function App() {
       return;
     }
 
+    const serverMessagesList: string[] = [];
     if (yourColor === currentTurn) {
+      serverMessagesList.push("Me:"+rowIndex+","+columnIndex)
       ws.send(new GameMessage(characterId, "NEXT=" + rowIndex + "," + columnIndex).toJson())
+    }else{
+      serverMessagesList.push("Opponent:"+rowIndex+","+columnIndex)
     }
+    setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
+
     setMap(newMap);
     setCurrentTurn(currentTurn === "w" ? "b" : "w");
   };
@@ -373,9 +379,9 @@ export default function App() {
 
       <View style={styles.header}>
         <View style={styles.statusRow}>
-            <Text style={styles.status}> Current Turn: {currentTurn === "w" ? "White" : "Black"}</Text>
-            <Text style={styles.status}> Character: {character}</Text>
-            <Text style={styles.status}> Color: {yourColor}</Text>
+          <Text style={styles.status}> Current Turn: {currentTurn === "w" ? "White" : "Black"}</Text>
+          <Text style={styles.status}> Character: {character}</Text>
+          <Text style={styles.status}> Color: {yourColor}</Text>
         </View>
 
         <View style={styles.logger}>
@@ -383,7 +389,7 @@ export default function App() {
             {
               serverMessages.map((item, ind) => {
                 return (
-                  <Text key={ind} style={styles.logLine}>
+                  <Text key={ind}>
                     {item}
                   </Text>
                 )
@@ -410,16 +416,17 @@ export default function App() {
       </View>
       <View style={styles.footer}>
         <View style={styles.controlPanel}>
-        <View style={styles.button}>
-          <Button title='Connect' onPress={() => onConnectGameServer()}> </Button>
+          <View style={styles.button}>
+            <Button title='Connect' onPress={() => onConnectGameServer()}> </Button>
+          </View>
+          <View style={styles.button}>
+            <Button title='Disconnect' onPress={() => onDisconnectGameServer()}></Button>
+          </View>
+          <View style={styles.button}>
+            <Button title='Reset' onPress={() => onResetGame()}></Button>
+          </View>
         </View>
-        <View style={styles.button}>
-          <Button title='Disconnect' onPress={() => onDisconnectGameServer()}></Button>
-        </View>
-        <View style={styles.button}>
-          <Button title='Reset' onPress={() => onResetGame()}></Button>
-        </View>
-        </View>
+
       </View>
 
       <StatusBar style="auto" />
@@ -456,20 +463,20 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     borderWidth: 3,
     marginHorizontal: 10,
+    height: '90%' // why 100% will overflow the flex box??
   },
   gameboard: {
     aspectRatio: 1,
     width: "100%",
     borderColor: "black",
     borderWidth: 5,
-    marginTop: 25,
+    marginTop: 15,
   },
   footer: {
     flex: 1,
     fontSize: 20,
     marginTop: 5,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   row: {
     flex: 1,
@@ -478,8 +485,9 @@ const styles = StyleSheet.create({
   controlPanel: {
     flex: 1,
     flexDirection: 'row',
+    justifyContent: 'space-evenly'
   },
-  button:{
-    flex: 1,
+  button: {
+    marginHorizontal: 3,
   }
 });
