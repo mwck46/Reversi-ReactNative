@@ -36,7 +36,6 @@ if (!manifest?.debuggerHost) {
 // Don't put websocket instance inside App, bcz everythin inside will 
 // be constantly refreshed, thus many connection will be created
 var ws: WebSocket;
-
 export default function App() {
   const [gameBoard, setGameBoard] = useState(emptyMap);
   const [currentTurn, setCurrentTurn] = useState<ColorCode>(initColor);
@@ -48,11 +47,13 @@ export default function App() {
   const [gameId, setGameId] = useState('');
 
   useEffect(() => {
-    ws = new WebSocket(url);
-
+    if (!ws) {
+      ws = new WebSocket(url);
+    }
+    
     ws.onopen = () => {
       const serverMessagesList: string[] = [];
-      serverMessagesList.push('Opened connection')
+      serverMessagesList.push('Opened connection');
       setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
     };
     ws.onclose = (e) => {
@@ -66,7 +67,6 @@ export default function App() {
       serverMessages.push(`[WebSocket Error] ${msg}`)
       setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
     };
-
     ws.onmessage = (e) => {
       const serverMessagesList: string[] = [];
       const msgObj = GameMessage.parseFromSocket(e.data);
@@ -78,6 +78,7 @@ export default function App() {
           setIsStarted(true);
         } else if (msgObj.message === "JOINGAME") {
           setMyColor(msgObj.remarks as ColorCode);
+          setIsStarted(true);
         } else if (msgObj.message === "ERROR") {
           serverMessagesList.push(`[Error] ${msgObj.remarks}`)
         } else if (msgObj.message === "GAMEOVER") {
@@ -307,7 +308,7 @@ export default function App() {
     return (
       <Modal
         animationType={"slide"}
-        // transparent={true}
+        transparent={true}
         visible={!isStarted}
         style={{ flex: 1, margin: 0 }}
       >
