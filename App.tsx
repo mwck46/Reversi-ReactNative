@@ -8,6 +8,7 @@ import Cell from "./components/Cell";
 import { GameMessage } from "./components/GameMessage";
 import uuid from 'react-native-uuid';
 import Constants from "expo-constants";
+import { ColorCode, ColorTable } from './components/GameSettings';
 
 const { manifest } = Constants;
 const characterId = uuid.v4().toString();
@@ -22,15 +23,7 @@ const emptyMap = [
   ["", "", "", "", "", "", "", ""],
 ];
 
-enum ColorCode {
-  Black = 0,
-  White = 1,
-}
-const ColorTable = new Map([
-  [0, 'black'],
-  [1, "white"],
-])
-
+const initColor = (Math.random() > 0.5 ? ColorCode.Black: ColorCode.White);
 
 //https://stackoverflow.com/a/6310592/9265852
 var url = ""
@@ -45,13 +38,13 @@ if (!manifest?.debuggerHost) {
 var ws: WebSocket;
 
 export default function App() {
-  const [map, setMap] = useState(emptyMap);
-  const [currentTurn, setCurrentTurn] = useState("w");
+  const [gameBoard, setGameBoard] = useState(emptyMap);
+  const [currentTurn, setCurrentTurn] = useState<ColorCode>(initColor);
   const [gameMode, setGameMode] = useState("LOCAL"); // LOCAL, REMOTE, BOT??
   const [isStarted, setIsStarted] = useState(false);
   const [serverMessages, setServerMessages] = useState<string[]>([]);
   const [character, setCharacter] = useState("");
-  const [myColor, setMyColor] = useState<ColorCode>((Math.floor(Math.random())));
+  const [myColor, setMyColor] = useState<ColorCode>(initColor);
   const [gameId, setGameId] = useState('');
 
   useEffect(() => {
@@ -84,7 +77,7 @@ export default function App() {
           setGameId(msgObj.remarks);
           setIsStarted(true);
         } else if (msgObj.message === "JOINGAME") {
-          setMyColor(Number(msgObj.remarks));
+          setMyColor(msgObj.remarks as ColorCode);
         } else if (msgObj.message === "ERROR") {
           serverMessagesList.push(`[Error] ${msgObj.remarks}`)
         } else if (msgObj.message === "GAMEOVER") {
@@ -108,21 +101,12 @@ export default function App() {
 
   const onResetGame = useCallback(() => {
     console.log("reset")
-    setMap((existingMap) => {
-      const newMap = existingMap.map(row => row.map(cell => ""))
-      newMap[3][3] = "b"
-      newMap[3][4] = "w"
-      newMap[4][4] = "b"
-      newMap[4][3] = "w"
-      //console.log(newMap)
-      return newMap;
-    });
-
+    setGameBoard(emptyMap);
     setServerMessages([])
-    ws.send(new GameMessage(characterId, "RESET").toJson())
+    ws.send(new GameMessage(characterId, "RESET").toString())
   }, [])
 
-  const updateMap = (gameboard: string[][], rowIdx: number, colIdx: number, currentTurn: string) => {
+  const updateMap = (gameboard: string[][], rowIdx: number, colIdx: number, currentTurn: ColorCode) => {
     // Add current
     gameboard[rowIdx][colIdx] = currentTurn;
 
@@ -276,7 +260,7 @@ export default function App() {
   }
 
   const onPress = (rowIndex: number, columnIndex: number) => {
-    if (map[rowIndex][columnIndex] !== "") {
+    if (gameBoard[rowIndex][columnIndex] !== "") {
       Alert.alert("Position already occupied");
       return;
     }
@@ -285,7 +269,7 @@ export default function App() {
     //                          CAUTION! 
     // newMap = [...map] cannot make a deep copy for an array of array
     ///////////////////////////////////////////////////////////////////
-    const newMap = map.map((row) => { return [...row] }) // deep clone
+    const newMap = gameBoard.map((row) => { return [...row] }) // deep clone
     console.log(character + ": currentTurn = " + currentTurn)
     const updatedCount = updateMap(newMap, rowIndex, columnIndex, currentTurn)
     if (updatedCount === 0) {
@@ -298,14 +282,14 @@ export default function App() {
     const serverMessagesList: string[] = [];
     if (myColor === currentTurn) {
       serverMessagesList.push("Me:" + rowIndex + "," + columnIndex)
-      ws.send(new GameMessage(characterId, "NEXT=" + rowIndex + "," + columnIndex).toJson())
+      ws.send(new GameMessage(characterId, "NEXT=" + rowIndex + "," + columnIndex).toString())
     } else {
       serverMessagesList.push("Opponent:" + rowIndex + "," + columnIndex)
     }
     setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
 
-    setMap(newMap);
-    setCurrentTurn(currentTurn === "w" ? "b" : "w");
+    setGameBoard(newMap);
+    setCurrentTurn(currentTurn === ColorCode.Black ? ColorCode.White : ColorCode.Black);
   };
 
   const registerNewGame = useCallback(() => {
@@ -370,7 +354,7 @@ export default function App() {
 
       <View style={styles.header}>
         <View style={styles.statusRow}>
-          <Text style={styles.status}> Current Turn: {currentTurn === "w" ? "White" : "Black"}</Text>
+          <Text style={styles.status}> Current Turn: {ColorTable.get(currentTurn!)}</Text>
           <Text style={styles.status}> Character: {character}</Text>
           <Text style={styles.status}> Color: {myColor}</Text>
         </View>
@@ -392,16 +376,17 @@ export default function App() {
 
       <View style={styles.gameboard}>
         {
-          map.map((row, rowIndex) => (
+          gameBoard.map((row, rowIndex) => (
             <View key={`row-${rowIndex}`} style={{ flex: 1, flexDirection: "row", }}>
-              {row.map((cell, columnIndex) => (
+              {
+              row.map((cell, columnIndex) => (
                 <Cell key={`row-${rowIndex}-col-${columnIndex}`}
                   cell={cell}
                   onPress={() => onPress(rowIndex, columnIndex)}
                 />
-              ))}
+              ))
+              }
             </View>
-
           ))
         }
       </View>

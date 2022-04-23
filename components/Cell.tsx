@@ -1,13 +1,14 @@
 import React, { ClassicElement } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
+import { ColorCode } from './GameSettings';
 
 const Cell = (props: any) => {
   const { cell, onPress } = props;
 
   return (
     <Pressable onPress={() => onPress()} style={styles.cell}>
-      {cell === "b" && <View style={[styles.circle, styles.blackcircle]} />}
-      {cell === "w" && <View style={[styles.circle, styles.whitecircle]} />}
+      {cell === ColorCode.Black && <View style={[styles.circle, styles.blackcircle]} />}
+      {cell === ColorCode.White && <View style={[styles.circle, styles.whitecircle]} />}
     </Pressable>
   );
 };
