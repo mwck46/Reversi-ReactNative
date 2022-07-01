@@ -76,8 +76,10 @@ export default function App() {
         if (msgObj.message === "GAMEID") {
           setGameId(msgObj.remarks);
           setIsStarted(true);
+          serverMessagesList.push(`Started new game ID=${msgObj.remarks}, please let your friend know`)
         } else if (msgObj.message === "JOINGAME") {
-          setMyColor(msgObj.remarks as ColorCode);
+          setMyColor((msgObj.remarks == ColorCode.Black) ? ColorCode.White : ColorCode.Black);
+          setCurrentTurn(msgObj.remarks as ColorCode);
           setIsStarted(true);
         } else if (msgObj.message === "ERROR") {
           serverMessagesList.push(`[Error] ${msgObj.remarks}`)
@@ -283,9 +285,9 @@ export default function App() {
     const serverMessagesList: string[] = [];
     if (myColor === currentTurn) {
       serverMessagesList.push("Me:" + rowIndex + "," + columnIndex)
-      ws.send(new GameMessage(characterId, "NEXT=" + rowIndex + "," + columnIndex).toString())
+      ws.send(new GameMessage(characterId, "NEXTMOVE", rowIndex + "," + columnIndex).toString());
     } else {
-      serverMessagesList.push("Opponent:" + rowIndex + "," + columnIndex)
+      serverMessagesList.push("Opponent:" + rowIndex + "," + columnIndex);
     }
     setServerMessages(serverMessages => [...serverMessages, ...serverMessagesList])
 
@@ -358,6 +360,7 @@ export default function App() {
           <Text style={styles.status}> Current Turn: {ColorTable.get(currentTurn!)}</Text>
           <Text style={styles.status}> Character: {character}</Text>
           <Text style={styles.status}> Color: {myColor}</Text>
+          <Text style={styles.status}> Game ID: {gameId}</Text>
         </View>
 
         <View style={styles.logger}>
@@ -420,13 +423,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     borderWidth: 1,
     marginRight: 3,
+    paddingHorizontal: 5,
   },
   logger: {
     backgroundColor: '#ffeece',
     flexGrow: 1,
     borderWidth: 3,
     marginHorizontal: 10,
-    height: '90%' // why 100% will overflow the flex box??
+    marginTop: 5,
+    height: 150,
   },
   gameboard: {
     aspectRatio: 1,
