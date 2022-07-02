@@ -3,10 +3,10 @@ import { View, StyleSheet, Pressable } from "react-native";
 import { ColorCode } from './GameSettings';
 
 const Cell = (props: any) => {
-  const { cell, onPress } = props;
+  const { cell, onPress, disabled } = props;
 
   return (
-    <Pressable onPress={() => onPress()} style={styles.cell}>
+    <Pressable onPress={() => onPress()} style={styles.cell} disabled={disabled}>
       {cell === ColorCode.Black && <View style={[styles.circle, styles.blackcircle]} />}
       {cell === ColorCode.White && <View style={[styles.circle, styles.whitecircle]} />}
     </Pressable>

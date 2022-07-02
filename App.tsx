@@ -387,6 +387,7 @@ export default function App() {
                 <Cell key={`row-${rowIndex}-col-${columnIndex}`}
                   cell={cell}
                   onPress={() => onPress(rowIndex, columnIndex)}
+                  disabled={myColor != currentTurn}
                 />
               ))
               }
