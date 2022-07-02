@@ -15,7 +15,8 @@ The game is developed using React Native + Expo and Typescript. Mobile clients c
 
 ### Executing program
 
-```expo start
+```
+expo start
 ```
 
 
