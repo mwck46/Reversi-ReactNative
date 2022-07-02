@@ -4,7 +4,7 @@ Reversi-ReactNative is an online cross platform mobile game that allows two play
 
 ## Description
 
-The game is developed using React Native + Expo and Typescript. Mobile clients communicate with the server via the WebSocket protocol.  The WebSocket server GitHub repo ReversiServer is [here] (https://github.com/mwck46/ReversiServer) 
+The game is developed using React Native + Expo and Typescript. Mobile clients communicate with the server via the WebSocket protocol.  The WebSocket server GitHub repo ReversiServer is [here](https://github.com/mwck46/ReversiServer) 
 
 ## Getting Started
 
@@ -21,8 +21,8 @@ The game is developed using React Native + Expo and Typescript. Mobile clients c
 
 ## Authors
 
-ex. Michael Wong  
-ex. [@mwck46](mwckkwork@gmail.com)
+Michael Wong  
+[@mwck46](mwckkwork@gmail.com)
 
 ## Version History
 
