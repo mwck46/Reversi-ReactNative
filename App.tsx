@@ -310,7 +310,7 @@ export default function App() {
     return (
       <Modal
         animationType={"slide"}
-        transparent={true}
+        transparent={false}
         visible={!isStarted}
         style={{ flex: 1, margin: 0 }}
       >
