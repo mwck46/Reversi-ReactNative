@@ -21,8 +21,8 @@ The game is developed using React Native + Expo and Typescript. Mobile clients c
 
 ## Authors
 
-Michael Wong  
-[@mwck46](mwckkwork@gmail.com)
+Michael Wong   
+[@mwck46](https://github.com/mwck46)
 
 ## Version History
 
